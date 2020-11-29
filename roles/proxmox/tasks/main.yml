@@ -1,0 +1,95 @@
+---
+- name: stop vm forcefully
+  shell: ssh root@{{ proxmox_host }} "qm stop {{ newid }} -skiplock true"
+  ignore_errors: yes
+  delegate_to: localhost
+  tags:
+    - remove
+
+- name: stop vm
+  proxmox_kvm:
+    api_user: '{{ proxmox_user }}'
+    api_password: '{{ proxmox_pass }}'
+    api_host: '{{ proxmox_host }}'
+    vmid: '{{ newid }}'
+    state: stopped
+  ignore_errors: yes
+  delegate_to: localhost
+  tags:
+    - stop
+
+- name: remove vm
+  proxmox_kvm:
+    api_user: '{{ proxmox_user }}'
+    api_password: '{{ proxmox_pass }}'
+    api_host: '{{ proxmox_host }}'
+    name: '{{ inventory_hostname }}'
+    node: '{{ proxmox_node }}'
+    state: absent
+  ignore_errors: yes
+  notify:
+    - remove cname
+    - remove ptr
+  delegate_to: localhost
+  tags:
+    - remove
+
+- name: force all notified handlers to run about remove
+  meta: flush_handlers
+
+- name: clone vm
+  proxmox_kvm:
+    api_user: '{{ proxmox_user }}'
+    api_password: '{{ proxmox_pass }}'
+    api_host: '{{ proxmox_host }}'
+    node: '{{ proxmox_node }}'
+    clone: '{{ tmpl }}'
+    vmid: '{{ vmid }}'
+    newid: '{{ newid }}'
+    name: '{{ inventory_hostname }}'
+    storage: '{{ proxmox_storage }}'
+    timeout: 600
+  notify:
+    - add cname
+    - add ptr
+  delegate_to: localhost
+  tags:
+    - provision
+
+- name: force all notified handlers to run about provision
+  meta: flush_handlers
+
+- name: wait for a few seconds
+  wait_for:
+    timeout: 5
+  delegate_to: localhost
+
+- name: update vm
+  proxmox_kvm:
+    api_user: '{{ proxmox_user }}'
+    api_password: '{{ proxmox_pass }}'
+    api_host: '{{ proxmox_host }}'
+    name: '{{ inventory_hostname }}'
+    node: '{{ proxmox_node }}'
+    cores: '{{ cores }}'
+    memory: '{{ memory }}'
+    update: yes
+  notify:
+    - config network
+  delegate_to: localhost
+  tags:
+    - vm-update
+
+- name: force all notified handlers to run before start
+  meta: flush_handlers
+
+- name: start vm
+  proxmox_kvm:
+    api_user: '{{ proxmox_user }}'
+    api_password: '{{ proxmox_pass }}'
+    api_host: '{{ proxmox_host }}'
+    vmid: '{{ newid }}'
+    state: started
+  delegate_to: localhost
+  tags:
+    - start

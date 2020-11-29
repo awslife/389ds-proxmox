@@ -1,0 +1,17 @@
+[DS]
+ds1 newid=310 ip=10.0.0.124 mac=e2:de:41:6b:04:01
+ds2 newid=311 ip=10.0.0.125 mac=e2:de:41:6b:04:02
+ds2 newid=311 ip=10.0.0.125 mac=e2:de:41:6b:04:03
+
+[all:vars]
+vmid=200
+tmpl=EMPTY
+gw=10.0.0.1
+nameserver=10.0.0.1
+searchdomain=homelab.local
+ptrdomain=0.0.10.in-addr.arpa
+
+[DS:vars]
+cores=2
+memory=4096
+proxmox_storage=synodata

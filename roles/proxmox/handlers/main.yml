@@ -1,0 +1,59 @@
+---
+- name: remove cname
+  nsupdate:
+    key_name: '{{ dns_key }}'
+    key_secret: '{{ dns_secret }}'
+    server: '{{ dns_host }}'
+    zone: '{{ searchdomain }}'
+    record: '{{ inventory_hostname }}'
+    type: 'CNAME'
+    state: absent
+  delegate_to: localhost
+  tags:
+    - dns-remove
+
+- name: remove ptr
+  nsupdate:
+    key_name: '{{ dns_key }}'
+    key_secret: '{{ dns_secret }}'
+    server: '{{ dns_host }}'
+    record: '{{ ip.split(".")[3] }}.{{ ptrdomain }}'
+    type: 'PTR'
+    zone: '{{ ptrdomain }}'
+    state: absent
+  delegate_to: localhost
+  tags:
+    - dns-remove
+
+- name: add cname
+  nsupdate:
+    key_name: '{{ dns_key }}'
+    key_secret: '{{ dns_secret }}'
+    server: '{{ dns_host }}'
+    zone: '{{ searchdomain }}'
+    record: '{{ inventory_hostname }}'
+    value: '{{ ip }}'
+    state: present
+  delegate_to: localhost
+  tags:
+    - dns-add
+
+- name: add ptr
+  nsupdate:
+    key_name: '{{ dns_key }}'
+    key_secret: '{{ dns_secret }}'
+    server: '{{ dns_host }}'
+    record: '{{ ip.split(".")[3] }}.{{ ptrdomain }}'
+    type: 'PTR'
+    value: '{{ inventory_hostname }}.{{ searchdomain }}'
+    zone: '{{ ptrdomain }}'
+    state: present
+  delegate_to: localhost
+  tags:
+    - dns-add
+
+- name: config network
+  shell: ssh root@{{ proxmox_host }} "qm set {{ newid }} -net0 virtio={{ mac | upper }},bridge=vmbr2,firewall=1"
+  delegate_to: localhost
+  tags:
+    - vm-network
