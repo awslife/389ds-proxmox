@@ -1,0 +1,45 @@
+---
+- name: wait for connection to be installed os
+  wait_for_connection:
+    timeout: 1800
+  tags:
+    - wait
+
+- name: sleep for cluster to be ready
+  wait_for:
+    port: 22
+    state: started
+    timeout: 600
+  tags:
+    - wait
+
+- name: set hostname
+  hostname:
+    name: '{{ inventory_hostname }}'
+  tags:
+    - hostname
+
+- name: set kernel parameter
+  copy:
+    content: |
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.bridge.bridge-nf-call-iptables = 1
+    dest: /etc/sysctl.d/k8s.conf
+  tags:
+    - kernel
+
+- name: set selinux in permissive mode
+  replace:
+    path: /etc/selinux/config
+    regexp: '^SELINUX=enforcing$'
+    replace: 'SELINUX=permissive'
+  tags:
+    - security
+
+- name: add the epel repository
+  yum:
+    name:
+      - epel-release
+    state: present
+  tags:
+    - package

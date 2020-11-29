@@ -1,7 +1,6 @@
 [DS]
-ds1 newid=310 ip=10.0.0.124 mac=e2:de:41:6b:04:01
-ds2 newid=311 ip=10.0.0.125 mac=e2:de:41:6b:04:02
-ds2 newid=311 ip=10.0.0.125 mac=e2:de:41:6b:04:03
+ds1 newid=310 ip=10.0.0.140 mac=e2:de:41:6b:04:01
+ds2 newid=311 ip=10.0.0.141 mac=e2:de:41:6b:04:02
 
 [all:vars]
 vmid=200

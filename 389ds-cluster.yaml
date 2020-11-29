@@ -1,8 +1,9 @@
 ---
-- name: make vm for 389ds on proxmox
+- name: 389ds cluster config on proxmox
   hosts: '{{ hosts | default("all") }}'
-  remote_user: root
   gather_facts: no
+  become: yes
+  become_method: sudo
 
   vars:
     ansible_user: '{{ lookup("env","ANSIBLE_USER") }}'
@@ -13,9 +14,5 @@
     proxmox_host: '{{ lookup("env","PROXMOX_HOST") }}'
     proxmox_node: '{{ lookup("env","PROXMOX_NODE") }}'
 
-    dns_key: '{{ lookup("env","DNS_KEY") }}'
-    dns_secret: '{{ lookup("env","DNS_SECRET") }}'
-    dns_host: '{{ lookup("env","DNS_HOST") }}'
-
   roles:
-    - proxmox
+    - cluster
